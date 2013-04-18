@@ -4,6 +4,7 @@ import argparse
 from xml.dom.minidom import parse
 from datetime import datetime
 import numpy as np
+import os
 
 import plotting
 
@@ -75,6 +76,18 @@ class Workout:
                 i += 1
         return dist
 
+    def GetTotalDist(self):
+        dist = 0.0
+        for lap in self.laps:
+            dist += lap.dist
+        return dist
+
+    def GetTotalTime(self):
+        time = 0.0
+        for lap in self.laps:
+            time += lap.time
+        return time
+
 ########################################################################
 def ParseLap(lap_element):
 
@@ -120,12 +133,11 @@ def ParseLap(lap_element):
     return new_lap
 
 ########################################################################
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("fname")
-    args = parser.parse_args()
-    fname = args.fname
-    doc = parse(fname)
+def ParseDoc(doc_name):
+    try:
+        doc = parse(doc_name)
+    except:
+        return None
 
     workout = Workout()
 
@@ -133,9 +145,32 @@ if __name__ == "__main__":
     laps = doc.getElementsByTagName("Lap")
     for lap_element in laps:
         workout.AddLap(lap_element)
-#        new_lap = ParseLap(lap_element)
-#        new_laps.append(new_lap)
 
-    plotting.PlotAlt(workout)
+    return workout
 
-#    print new_laps
+########################################################################
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fname")
+    parser.add_argument("--path")
+    args = parser.parse_args()
+    fname = args.fname
+    path = args.path
+
+    if fname != None:
+        workout = ParseDoc(fname)
+        plotting.PlotAlt(workout)
+
+    if path != None:
+        workouts = []
+        for f in os.listdir(path):
+            if os.path.splitext(f)[1] != ".tcx":
+                continue
+
+            workout = ParseDoc(os.path.join(path, f))
+            if workout == None:
+                print "Ignoring workout %s" % f
+                continue
+            workouts.append(workout)
+
+        plotting.PlotPaceVsDistance(workouts)
