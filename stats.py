@@ -88,6 +88,9 @@ class Workout:
             time += lap.time
         return time
 
+    def GetStartTime(self):
+        return self.laps[0].start_time
+
 ########################################################################
 def ParseLap(lap_element):
 

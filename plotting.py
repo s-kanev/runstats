@@ -2,6 +2,7 @@ import matplotlib.pyplot as pp
 import matplotlib as mpl
 import numpy as np
 from scipy import stats as st
+import datetime
 
 import stats
 
@@ -23,14 +24,22 @@ def PlotPaceVsDistance(workouts):
     dist = np.zeros(nitems)
     pace = np.zeros(nitems)
 
+    recent_dist = []
+    recent_pace = []
     for i, workout in enumerate(workouts):
         dist[i] = workout.GetTotalDist() / 1000.0 # in km
         pace[i] = workout.GetTotalTime() / dist[i]
+      
+        if datetime.datetime.now() - workout.GetStartTime() < datetime.timedelta(days=60):
+            recent_dist.append(dist[i])
+            recent_pace.append(pace[i])
         
 
     f = pp.figure()
     ax = pp.subplot(111)
     pp.scatter(dist, pace)
+
+    pp.scatter(recent_dist, recent_pace, color='#08C43A')
 
     pp.ylabel("Run pace (min / km)")
     pp.xlabel("Run length (km)")
