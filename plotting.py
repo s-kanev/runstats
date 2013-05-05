@@ -16,7 +16,7 @@ def PlotAlt(workout):
     pp.plot(dist, alt)
     pp.show()
 
-def minuteFormatter(x, p):
+def MinuteFormatter(x, p):
     return "%02.d:%02.d" % (int(x / 60), x % 60)
 
 def PlotPaceVsDistance(workouts):
@@ -47,7 +47,7 @@ def PlotPaceVsDistance(workouts):
     pp.xlim([0, 47.0])
     pp.ylim([270, 370])
 
-    ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(minuteFormatter))
+    ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
     slope, intercept, r_value, p_value, std_err = st.linregress(dist, pace)
     regr_x = np.array([5, 42])
@@ -81,11 +81,55 @@ def PlotDistanceAtPace(workouts):
 
     pp.hist(recent_pace, weights=recent_dist, bins=24, range=[240, 480], color='r')
 
-    ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(minuteFormatter))
+    ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
     pp.xlabel("Pace (min / km)")
     pp.ylabel("Total distance at pace (km)")
 
     pp.legend(["Total", "Last 60 days"])
+
+    pp.show()
+
+def PlotMonthlyDist(workouts):
+    monthly = {}
+
+    for workout in workouts:
+        month = workout.GetStartTime().month
+        year = workout.GetStartTime().year
+
+        month = workout.GetStartTime().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if not month in monthly:
+            monthly[month] = 0.0
+        monthly[month] += workout.GetTotalDist() / 1000.0
+
+
+    pp.figure()
+    ax = pp.subplot(111, aspect=0.4)
+
+    n_items = len(monthly.keys())
+    sort_ind = sorted(range(n_items), key=lambda i: monthly.keys()[i])
+    months =  [monthly.keys()[ind] for ind in sort_ind]
+    totals =  [monthly.values()[ind] for ind in sort_ind]
+
+    AV_MONTHS = 3
+    totals_av = []
+    # get moving average
+    for i in range(AV_MONTHS-1, n_items):
+        total = 0.0
+        for j in range(AV_MONTHS):
+            total += totals[i-j]
+        totals_av.append(total / AV_MONTHS)
+
+    pp.plot(months, totals, 'o--', markersize=14, color='k', mfc='b')
+
+    pp.plot(months[AV_MONTHS-1:], totals_av, 'o--', color='k', markersize=14, mfc='g')
+
+    pp.legend(["Monthly", "3-month average"], loc='upper left')
+    pp.ylim([0, 240])
+    pp.xlim([months[0] - datetime.timedelta(days=31), months[-1] + datetime.timedelta(days=31)])
+
+    ax.yaxis.grid(color='b')
+
+    pp.ylabel("Total distance (km)")
 
     pp.show()

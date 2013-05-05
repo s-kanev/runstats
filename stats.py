@@ -178,3 +178,4 @@ if __name__ == "__main__":
 
         plotting.PlotPaceVsDistance(workouts)
         plotting.PlotDistanceAtPace(workouts)
+        plotting.PlotMonthlyDist(workouts)
