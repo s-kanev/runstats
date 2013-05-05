@@ -56,3 +56,36 @@ def PlotPaceVsDistance(workouts):
     pp.annotate("%.0f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
 
     pp.show()
+
+def PlotDistanceAtPace(workouts):
+    paces = []
+    dists = []
+
+    recent_dist = []
+    recent_pace = []
+
+    for workout in workouts:
+        for lap in workout.laps:
+            pace = lap.time / (lap.dist / 1000.0)
+            paces.append(pace)
+            dists.append(lap.dist / 1000.0)
+
+            if datetime.datetime.now() - workout.GetStartTime() < datetime.timedelta(days=60):
+                recent_dist.append(lap.dist / 1000.0)
+                recent_pace.append(pace)
+
+    pp.figure()
+    ax = pp.subplot(111)
+
+    pp.hist(paces, weights=dists, bins=24, range=[240, 480], color='#52730B')
+
+    pp.hist(recent_pace, weights=recent_dist, bins=24, range=[240, 480], color='r')
+
+    ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(minuteFormatter))
+
+    pp.xlabel("Pace (min / km)")
+    pp.ylabel("Total distance at pace (km)")
+
+    pp.legend(["Total", "Last 60 days"])
+
+    pp.show()

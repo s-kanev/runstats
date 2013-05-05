@@ -177,3 +177,4 @@ if __name__ == "__main__":
             workouts.append(workout)
 
         plotting.PlotPaceVsDistance(workouts)
+        plotting.PlotDistanceAtPace(workouts)
