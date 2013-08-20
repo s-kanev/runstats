@@ -66,6 +66,9 @@ def PlotDistanceAtPace(workouts):
 
     for workout in workouts:
         for lap in workout.laps:
+            if lap.dist == 0.0:
+                continue
+
             pace = lap.time / (lap.dist / 1000.0)
             paces.append(pace)
             dists.append(lap.dist / 1000.0)
