@@ -45,7 +45,7 @@ def PlotPaceVsDistance(workouts):
     pp.xlabel("Run length (km)")
 
     pp.xlim([0, 47.0])
-    pp.ylim([270, 370])
+    pp.ylim([220, 370])
 
     ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
@@ -53,7 +53,7 @@ def PlotPaceVsDistance(workouts):
     regr_x = np.array([5, 42])
     regr_y = intercept + regr_x * slope 
     pp.plot(regr_x, regr_y, '--', color='k')
-    pp.annotate("%.0f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
+    pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
 
     pp.show()
 
