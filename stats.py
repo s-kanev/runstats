@@ -110,6 +110,10 @@ def ParseLap(lap_element):
     start_time = lap_element.getAttribute("StartTime")
     new_lap.SetStart(datetime.strptime(start_time, TIME_FORMAT))
 
+    # No trackpoints, just return
+    if len(lap_element.getElementsByTagName("Track")) == 0:
+        return new_lap
+
     # Get GPS trackpoints
     for track in lap_element.getElementsByTagName("Track"):
         if track.parentNode == lap_element:
