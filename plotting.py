@@ -6,6 +6,8 @@ import datetime
 
 import stats
 
+def MinuteFormatter(x, p):
+    return "%02.d:%02.d" % (int(x / 60), x % 60)
 
 def PlotAlt(workout):
     pp.figure()
@@ -16,8 +18,24 @@ def PlotAlt(workout):
     pp.plot(dist, alt)
     pp.show()
 
-def MinuteFormatter(x, p):
-    return "%02.d:%02.d" % (int(x / 60), x % 60)
+def PlotPace(workout):
+    pp.figure()
+    ax = pp.subplot(111)
+
+    pace = workout.GetPace()
+    lap_starts = workout.GetLapStarts()
+
+    pp.ylabel("Run pace (min / km)")
+    pp.xlabel("Distance (km)")
+
+    ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
+
+    pp.grid(color='b')
+    
+    pp.ylim([200, 450])
+
+    pp.plot(lap_starts, pace, "o--", markersize=8, mfc='#08C43A', color='k')
+    pp.show()
 
 def PlotPaceVsDistance(workouts):
     nitems = len(workouts)

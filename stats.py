@@ -91,6 +91,27 @@ class Workout:
     def GetStartTime(self):
         return self.laps[0].start_time
 
+    def GetPace(self):
+        res = []
+        for lap in self.laps:
+            if lap.dist == 0.0:
+                continue
+
+            pace = lap.time / (lap.dist / 1000.0) # s / km
+            res.append(pace)
+        return res
+
+    def GetLapStarts(self):
+        res = []
+        start = 0.0
+        for lap in self.laps:
+            if lap.dist == 0.0:
+                continue
+
+            res.append(start)
+            start += lap.dist / 1000.0
+        return res
+
 ########################################################################
 def ParseLap(lap_element):
 
@@ -166,6 +187,7 @@ if __name__ == "__main__":
 
     if fname != None:
         workout = ParseDoc(fname)
+        plotting.PlotPace(workout)
         plotting.PlotAlt(workout)
 
     if path != None:
