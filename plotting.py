@@ -6,6 +6,9 @@ import datetime
 
 import stats
 
+COLORS = ['#08C43A', '#6B2747', 'b']
+FONT_SIZE = 18
+
 def MinuteFormatter(x, p):
     return "%02.d:%02.d" % (int(x / 60), x % 60)
 
@@ -18,23 +21,31 @@ def PlotAlt(workout):
     pp.plot(dist, alt)
     pp.show()
 
-def PlotPace(workout):
+def PlotPace(workouts):
     pp.figure()
     ax = pp.subplot(111)
 
-    pace = workout.GetPace()
-    lap_starts = workout.GetLapStarts()
+    for i,workout in enumerate(workouts):
+        pace = workout.GetPace()
+        lap_starts = workout.GetLapStarts()
+        pp.plot(lap_starts, pace, "o--", markersize=12,
+                    mfc=COLORS[i], label=workout.name,
+                    color='k')
 
-    pp.ylabel("Run pace (min / km)")
-    pp.xlabel("Distance (km)")
+    pp.ylabel("Run pace (min / km)", fontsize=FONT_SIZE)
+    pp.xlabel("Distance (km)", fontsize=FONT_SIZE)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
 
     ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
     pp.grid(color='b')
-    
     pp.ylim([200, 450])
+    pp.legend(loc='upper left', fancybox=True, fontsize=FONT_SIZE)
 
-    pp.plot(lap_starts, pace, "o--", markersize=8, mfc='#08C43A', color='k')
     pp.show()
 
 def PlotPaceVsDistance(workouts):

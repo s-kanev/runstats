@@ -46,6 +46,7 @@ class Lap:
 class Workout:
     def __init__(self):
         self.laps = []
+        self.name = "<None>"
 
     def AddLap(self, lap_element):
         self.laps.append(ParseLap(lap_element))
@@ -169,6 +170,12 @@ def ParseDoc(doc_name):
 
     workout = Workout()
 
+    names = doc.getElementsByTagName("Name")
+    if len(names):
+        for name in names:
+            if name.parentNode.tagName == "Activity":
+                workout.name = name.firstChild.data
+
     new_laps = []
     laps = doc.getElementsByTagName("Lap")
     for lap_element in laps:
@@ -186,9 +193,14 @@ if __name__ == "__main__":
     path = args.path
 
     if fname != None:
-        workout = ParseDoc(fname)
-        plotting.PlotPace(workout)
-        plotting.PlotAlt(workout)
+        fnames = fname.split(",")
+        print fnames
+ 
+        workouts = []
+        for f in fnames:
+            workouts.append(ParseDoc(f))
+        plotting.PlotPace(workouts)
+#        plotting.PlotAlt(workout)
 
     if path != None:
         workouts = []
