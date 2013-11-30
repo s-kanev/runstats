@@ -27,7 +27,7 @@ def PlotPace(workouts):
 
     for i,workout in enumerate(workouts):
         pace = workout.GetPace()
-        lap_starts = workout.GetLapStarts()
+        lap_starts = workout.GetLapEnds()
         pp.plot(lap_starts, pace, "o--", markersize=12,
                     mfc=COLORS[i], label=workout.name,
                     color='k')

@@ -113,6 +113,16 @@ class Workout:
             start += lap.dist / 1000.0
         return res
 
+    def GetLapEnds(self):
+        res = []
+        end = 0.0
+        for lap in self.laps:
+            if lap.dist == 0.0:
+                continue
+
+            end += lap.dist / 1000.0
+            res.append(end)
+        return res
 ########################################################################
 def ParseLap(lap_element):
 
