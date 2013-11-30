@@ -54,6 +54,7 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
 <script>
 
 // Ran or not
@@ -66,13 +67,22 @@ var valueById = [
   false, false,  NaN, true, false, false, false
 ];
 
+function hasRun(d) { return valueById[d.id]; }
+function nameByID(id, names) {
+  for (i in names) {
+    if (names[i].id == id)
+      return names[i];
+  }
+  return null;
+}
+
 var path = d3.geo.path();
 
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
-  .html(function(d) {
-    return "<strong>State:</strong> <span style='color:red'>" + d.id + "</span>";
+  .html(function(d, names) {
+    return "<strong>" + nameByID(d.id, names).name +"</strong> <br/> <span style='color:red'>" + d.id + "</span> " ;
   })
 
 var svg = d3.select("body").append("svg")
@@ -82,29 +92,38 @@ var svg = d3.select("body").append("svg")
 
 svg.call(tip)
 
-function hasRun(d) { return valueById[d.id]; }
+function json(path, callback) {
+  d3.json(path, function(json_) {
+    json_ ? callback(null, json_) : callback("error", null);
+  });
+}
 
-d3.json("/data/us.json", function(error, us) {
-  svg.append("path")
-      .datum(topojson.feature(us, us.objects.land))
-      .attr("class", "land")
-      .attr("d", path);
+queue()
+  .defer(json, "/data/us.json")
+  .defer(json, "/data/state_names.json")
+  .await(function(error, us, names) {
+    if (error) console.error(error)
 
-  svg.selectAll(".state")
-      .data(topojson.feature(us, us.objects.states).features)
-      .enter().append("path")
-      .attr("class", function(d) {
-        return hasRun(d) ? "state ran" : "state";
-      })
-      .attr("d", path)
-      .on('mouseover', function(d) {
-        if (hasRun(d))
-          tip.show(d);
-      })
-      .on('mouseout', function(d) {
-        if (hasRun(d))
-          tip.hide(d);
-      });
- });
+    svg.append("path")
+        .datum(topojson.feature(us, us.objects.land))
+        .attr("class", "land")
+        .attr("d", path);
+
+    svg.selectAll(".state")
+        .data(topojson.feature(us, us.objects.states).features)
+        .enter().append("path")
+        .attr("class", function(d) {
+          return hasRun(d) ? "state ran" : "state";
+        })
+        .attr("d", path)
+        .on('mouseover', function(d) {
+          if (hasRun(d))
+            tip.show(d, names);
+        })
+        .on('mouseout', function(d) {
+          if (hasRun(d))
+            tip.hide(d, names);
+        });
+  });
 
 </script>
