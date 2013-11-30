@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>50 states map</title>
+<style>
+
+.land {
+  fill: #fff;
+  stroke: #ccc;
+}
+
+.state {
+  fill: #ccc;
+  stroke: #666;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script> 
+<script type="text/javascript" src="jquery.tipsy.js"></script>
+<link href="tipsy.css" rel="stylesheet" type="text/css" />
+<script>
+
+// Ran or not
+var valueById = [
+   NaN, false, false,  NaN, false, false, true,  NaN, false, true,
+  false,  NaN, false, false,  NaN, false, false, false, false, false,
+  false, false, false, true, false, true, false, false, false, false,
+  false, false, false, true, false, false, false, false, false, false,
+  false, false, false,  NaN, false, false, false, false, true, false,
+  false, false,  NaN, true, false, false, false
+];
+
+var path = d3.geo.path();
+
+var svg = d3.select("body").append("svg")
+    .attr("id", "map")
+    .attr("width", 960)
+    .attr("height", 500);
+
+svg.selectAll("circle")
+        .data([1])
+    .enter().append("svg:circle")
+        .attr("cx", 10)
+        .attr("cy", 10)
+        .attr("r", 10)
+
+d3.json("/data/us.json", function(error, us) {
+  svg.append("path")
+      .datum(topojson.feature(us, us.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svg.selectAll(".state")
+      .data(topojson.feature(us, us.objects.states).features)
+      .enter().append("path")
+      .attr("class", "state")
+      .attr("d", path)
+      .style("fill", function(d) {
+            return valueById[d.id] ? "#1c4f43" : "#ccc";
+        });
+});
+
+$('#map circle').tipsy({
+        html: true,
+        title: function() { return "Test"; }
+      });
+$('#map path').tipsy({
+        html: true,
+        title: function() { return "Test"; }
+      });
+
+</script>
