@@ -14,25 +14,29 @@
 }
 
 .state.ran {
-  fill: #1c4f43;
+  fill: #349881;
 }
 
 .state.ran:hover {
-  fill: orangered;
+  fill: #431a24;
 }
 
 .state.tbd {
-  fill: green;
+  fill: #3e86b5;
 }
 
 .state.tbd:hover {
-  fill: orangered;
+  fill: #431a24;
+}
+
+.tip-heading {
+  font-weight: bold;
+  color: #99354f;
 }
 
 .d3-tip {
   line-height: 1;
-  font-weight: bold;
-  padding: 12px;
+  padding: 14px;
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
   border-radius: 2px;
@@ -98,7 +102,7 @@ var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
   .html(function(d, names, ran) {
-    return "<strong>" + nameByID(d.id, names).name +"</strong> <br/> <span style='color:red'>" + ranByID(d.id, names, ran).text + "</span> " ;
+    return "<span class='tip-heading'>" + nameByID(d.id, names).name +"</span> <br/> <br/> "+ ranByID(d.id, names, ran).text;
   })
 
 var svg = d3.select("body").append("svg")
