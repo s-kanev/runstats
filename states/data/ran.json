@@ -1,0 +1,42 @@
+[
+  {
+    "state": "CA",
+    "text": "San Francisco 2012 4:12:42 <br/> San Francisco 2013 3:47:50"
+  },
+  {
+    "state": "MA",
+    "text": "BayState 2012 3:36:03 <br/> BayState 2013 3:47:18"
+  },
+  {
+    "state": "TX",
+    "text": "Austin 2013 4:12:50"
+  },
+  {
+    "state": "ME",
+    "text": "Sugarloaf 2013 3:47:30"
+  },
+  {
+    "state": "WA",
+    "text": "Tunnel 2013 3:29:06"
+  },
+  {
+    "state": "CT",
+    "text": "Hartford 2013 3:37:33"
+  },
+  {
+    "state": "NH",
+    "text": "Manchester city 2013 3:20:47"
+  },
+  {
+    "state": "IL",
+    "text": "TBD"
+  },
+  {
+    "state": "VT",
+    "text": "TBD"
+  },
+  {
+    "state": "AZ",
+    "text": "TBD"
+  }
+]

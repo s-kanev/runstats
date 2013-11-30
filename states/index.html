@@ -21,6 +21,14 @@
   fill: orangered;
 }
 
+.state.tbd {
+  fill: green;
+}
+
+.state.tbd:hover {
+  fill: orangered;
+}
+
 .d3-tip {
   line-height: 1;
   font-weight: bold;
@@ -57,17 +65,6 @@
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script>
 
-// Ran or not
-var valueById = [
-   NaN, false, false,  NaN, false, false, true,  NaN, false, true,
-  false,  NaN, false, false,  NaN, false, false, false, false, false,
-  false, false, false, true, false, true, false, false, false, false,
-  false, false, false, true, false, false, false, false, false, false,
-  false, false, false,  NaN, false, false, false, false, true, false,
-  false, false,  NaN, true, false, false, false
-];
-
-function hasRun(d) { return valueById[d.id]; }
 function nameByID(id, names) {
   for (i in names) {
     if (names[i].id == id)
@@ -75,14 +72,33 @@ function nameByID(id, names) {
   }
   return null;
 }
+function ranByState(state, ran) {
+  for (i in ran) {
+    if (ran[i].state == state)
+      return ran[i];
+  }
+  return null;
+}
+function ranByID(id, names, ran) {
+  var state = nameByID(id, names);
+  if (state == null)
+    return false;
+  return ranByState(state.state, ran);
+}
+function hasRun(id, names, ran) {
+  var state = nameByID(id, names);
+  if (state == null)
+    return false;
+  return (ranByState(state.state, ran) != null);
+}
 
 var path = d3.geo.path();
 
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
-  .html(function(d, names) {
-    return "<strong>" + nameByID(d.id, names).name +"</strong> <br/> <span style='color:red'>" + d.id + "</span> " ;
+  .html(function(d, names, ran) {
+    return "<strong>" + nameByID(d.id, names).name +"</strong> <br/> <span style='color:red'>" + ranByID(d.id, names, ran).text + "</span> " ;
   })
 
 var svg = d3.select("body").append("svg")
@@ -101,7 +117,8 @@ function json(path, callback) {
 queue()
   .defer(json, "/data/us.json")
   .defer(json, "/data/state_names.json")
-  .await(function(error, us, names) {
+  .defer(json, "/data/ran.json")
+  .await(function(error, us, names, ran) {
     if (error) console.error(error)
 
     svg.append("path")
@@ -113,16 +130,19 @@ queue()
         .data(topojson.feature(us, us.objects.states).features)
         .enter().append("path")
         .attr("class", function(d) {
-          return hasRun(d) ? "state ran" : "state";
+          ran_ = ranByID(d.id, names, ran);
+          if (ran_ == null) return "state";
+          if (ran_.text == "TBD") return "state tbd";
+          return "state ran";
         })
         .attr("d", path)
         .on('mouseover', function(d) {
-          if (hasRun(d))
-            tip.show(d, names);
+          if (hasRun(d.id, names, ran))
+            tip.show(d, names, ran);
         })
         .on('mouseout', function(d) {
-          if (hasRun(d))
-            tip.hide(d, names);
+          if (hasRun(d.id, names, ran))
+            tip.hide(d, names, ran);
         });
   });
 
