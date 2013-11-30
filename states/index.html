@@ -13,13 +13,39 @@
   stroke: #666;
 }
 
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script> 
-<script type="text/javascript" src="jquery.tipsy.js"></script>
-<link href="tipsy.css" rel="stylesheet" type="text/css" />
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.min.js"></script>
 <script>
 
 // Ran or not
@@ -34,17 +60,19 @@ var valueById = [
 
 var path = d3.geo.path();
 
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>State:</strong> <span style='color:red'>" + d.id + "</span>";
+  })
+
 var svg = d3.select("body").append("svg")
     .attr("id", "map")
     .attr("width", 960)
     .attr("height", 500);
 
-svg.selectAll("circle")
-        .data([1])
-    .enter().append("svg:circle")
-        .attr("cx", 10)
-        .attr("cy", 10)
-        .attr("r", 10)
+svg.call(tip)
 
 d3.json("/data/us.json", function(error, us) {
   svg.append("path")
@@ -59,16 +87,9 @@ d3.json("/data/us.json", function(error, us) {
       .attr("d", path)
       .style("fill", function(d) {
             return valueById[d.id] ? "#1c4f43" : "#ccc";
-        });
+        })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide)
 });
-
-$('#map circle').tipsy({
-        html: true,
-        title: function() { return "Test"; }
-      });
-$('#map path').tipsy({
-        html: true,
-        title: function() { return "Test"; }
-      });
 
 </script>
