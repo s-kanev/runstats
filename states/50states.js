@@ -43,7 +43,10 @@ function drawStatesMap() {
   var dataFile = container.attr("data");
 
   var svg = container.append("svg")
-      .attr("id", "map");
+      .attr("id", "map")
+      .attr("viewBox", "0 0 960 500")
+      .attr("width", "100%")
+      .attr("preserveAspectRatio", "none");
 
   svg.call(tip);
 

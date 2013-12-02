@@ -1,6 +1,6 @@
 #map {
-  width: 960px;
-  height: 500px;
+  width: 100%;
+  max-width: 1280px;
 }
 
 .land {
