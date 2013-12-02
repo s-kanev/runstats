@@ -1,6 +1,6 @@
 (function() {
     
-    var mapBloggerPath = "https://raw.github.com/s-kanev/runstats/master/states/";
+    var mapBloggerPath = "http://s-kanev.github.io/runstats/states/";
     //var mapBloggerPath = "http://localhost:8088/"
     var mapBloggerJS = mapBloggerPath + "50states.js";
     var mapBloggerCSS = mapBloggerPath + "50states.css";
