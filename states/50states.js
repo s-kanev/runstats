@@ -1,4 +1,4 @@
-(function drawStatesMap() {
+function drawStatesMap() {
 
   var statesFile = "https://dl.dropboxusercontent.com/s/t4h6uol5jgudo3e/us.json";
   var statesNamesFile = "https://dl.dropboxusercontent.com/s/h8pts8fkzgarajg/state_names.json";
@@ -85,4 +85,4 @@
           });
     });
 
-})();
+}
