@@ -1,4 +1,4 @@
-function drawStatesMap(parentID, dataFile) {
+(function drawStatesMap() {
 
   var statesFile = "https://dl.dropboxusercontent.com/s/t4h6uol5jgudo3e/us.json";
   var statesNamesFile = "https://dl.dropboxusercontent.com/s/h8pts8fkzgarajg/state_names.json";
@@ -39,10 +39,13 @@ function drawStatesMap(parentID, dataFile) {
       return "<span class='tip-heading'>" + nameByID(d.id, names).name +"</span> <br/> <br/> "+ ranByID(d.id, names, ran).text;
     })
 
-  var svg = d3.select("#" + parentID).append("svg")
-      .attr("id", "map")
+  var container = d3.select(".states-container");
+  var dataFile = container.attr("data");
 
-  svg.call(tip)
+  var svg = container.append("svg")
+      .attr("id", "map");
+
+  svg.call(tip);
 
   function json(path, callback) {
     d3.json(path, function(json_) {
@@ -82,4 +85,4 @@ function drawStatesMap(parentID, dataFile) {
           });
     });
 
-}
+})();
