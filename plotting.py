@@ -109,9 +109,9 @@ def PlotDistanceAtPace(workouts):
     pp.figure()
     ax = pp.subplot(111)
 
-    pp.hist(paces, weights=dists, bins=24, range=[240, 480], color='#52730B')
+    pp.hist(paces, weights=dists, bins=30, range=[180, 480], color='#52730B')
 
-    pp.hist(recent_pace, weights=recent_dist, bins=24, range=[240, 480], color='r')
+    pp.hist(recent_pace, weights=recent_dist, bins=30, range=[180, 480], color='r')
 
     ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
