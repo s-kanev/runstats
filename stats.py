@@ -1,7 +1,7 @@
 #!/bin/python
 
 import argparse
-from xml.dom.minidom import parse
+from lxml import etree
 from datetime import datetime
 import numpy as np
 import os
@@ -127,67 +127,54 @@ class Workout:
 def ParseLap(lap_element):
 
     # Get lap totals -- time and distance
-    for dist in lap_element.getElementsByTagName("DistanceMeters"):
-        if dist.parentNode == lap_element:
-            dist_val = float(dist.firstChild.data)
-            break
-    for time in lap_element.getElementsByTagName("TotalTimeSeconds"):
-        if time.parentNode == lap_element:
-            time_val = float(time.firstChild.data)
-            break
+    dist = lap_element.find('./{*}DistanceMeters')
+    dist_val = float(dist.text)
+
+    time = lap_element.find('./{*}TotalTimeSeconds')
+    time_val = float(time.text)
 
     new_lap = Lap()
     new_lap.SetTotals(dist_val, time_val)
 
-    start_time = lap_element.getAttribute("StartTime")
+    start_time = lap_element.get("StartTime")
     new_lap.SetStart(datetime.strptime(start_time, TIME_FORMAT))
 
-    # No trackpoints, just return
-    if len(lap_element.getElementsByTagName("Track")) == 0:
+    track = lap_element.find("./{*}Track")
+    if track is None:
+        # No trackpoints, just return
         return new_lap
 
     # Get GPS trackpoints
-    for track in lap_element.getElementsByTagName("Track"):
-        if track.parentNode == lap_element:
-            break
+    for trackpoint in track.findall("./{*}Trackpoint"):
+        new_tp = TrackPoint()
 
-    for trackpoint in track.getElementsByTagName("Trackpoint"):
-        if trackpoint.parentNode == track:
-            new_tp = TrackPoint()
+        try:
+            new_tp.alt = float(trackpoint.find("./{*}AltitudeMeters").text)
+            new_tp.cum_dist = float(trackpoint.find("./{*}DistanceMeters").text)
+        except AttributeError:
+            # Some trackpoints only have a timestamp
+            continue
 
-            for alt in trackpoint.getElementsByTagName("AltitudeMeters"):
-                if alt.parentNode == trackpoint:
-                    new_tp.alt = float(alt.firstChild.data)
-                    break
-
-            for dist in trackpoint.getElementsByTagName("DistanceMeters"):
-                if dist.parentNode == trackpoint:
-                    new_tp.cum_dist = float(dist.firstChild.data)
-                    break
-
-            # XXX: proper corner cases
-            if new_tp.alt != -1 and new_tp.cum_dist != -1:
-                new_lap.AddPoint(new_tp)
+        # XXX: proper corner cases
+        if new_tp.alt != -1 and new_tp.cum_dist != -1:
+            new_lap.AddPoint(new_tp)
 
     return new_lap
 
 ########################################################################
 def ParseDoc(doc_name):
     try:
-        doc = parse(doc_name)
+        docroot = etree.parse(doc_name).getroot()
     except:
         return None
 
     workout = Workout()
 
-    names = doc.getElementsByTagName("Name")
-    if len(names):
-        for name in names:
-            if name.parentNode.tagName == "Activity":
-                workout.name = name.firstChild.data
+    name = docroot.find('./{*}Activities/{*}Activity/{*}Name')
+    if name is not None:
+        workout.name = name.text
 
-    new_laps = []
-    laps = doc.getElementsByTagName("Lap")
+    laps = docroot.findall('./{*}Activities/{*}Activity/{*}Lap')
     for lap_element in laps:
         workout.AddLap(lap_element)
 
