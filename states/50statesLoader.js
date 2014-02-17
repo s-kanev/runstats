@@ -1,42 +1,35 @@
 (function() {
     
     var mapBloggerPath = "http://s-kanev.github.io/runstats/states/";
-    //var mapBloggerPath = "http://localhost:8088/"
-    var mapBloggerJS = mapBloggerPath + "50states.js";
+    //var mapBloggerPath = "http://localhost:8000/"
+    var RequireJS = mapBloggerPath + "require.js";
     var mapBloggerCSS = mapBloggerPath + "50states.css";
-    var d3TipJS = "http://labratrevenge.com/d3-tip/javascripts/d3.tip.min.js";
 
-    // Initialize the main script.
-    try {
-        drawStatesMap();
-    } catch(e) {
-        var scriptId = 'mapPrinter';
-        if (document.getElementById(scriptId) === null) {
-            /* Append CSS to head */
-            var cssElem = document.createElement('link');
-            cssElem.rel = 'stylesheet';
-            cssElem.type = 'text/css';
-            cssElem.href = mapBloggerCSS;
-            var theHead = document.getElementsByTagName('head')[0];
-            theHead.appendChild(cssElem);
+    /* Append CSS to head */
+    var cssElem = document.createElement('link');
+    cssElem.rel = 'stylesheet';
+    cssElem.type = 'text/css';
+    cssElem.href = mapBloggerCSS;
+    var theHead = document.getElementsByTagName('head')[0];
+    theHead.appendChild(cssElem);
 
-            /* Append main script and register onload */
-            var elem = document.createElement('script');
-            elem.id = scriptId;
-            elem.onload = function() {
-                /* Ok, I'm sure this can generalize. */
-                var newElem = document.createElement('script');
-                newElem.id = "mapPrinter2";
-                newElem.onload = function() {
-                    drawStatesMap();
-                }
-                newElem.src = mapBloggerJS;
-                var theBody2 = document.getElementsByTagName('body')[0];
-                theBody2.appendChild(newElem);
+    /* Append requireJS script to deal with all dependences and register onload */
+    var elem = document.createElement('script');
+    elem.onload = function() {
+        requirejs.config({
+            "paths": {
+              "d3": "http://d3js.org/d3.v3.min",
+              "topojson": "http://d3js.org/topojson.v1.min",
+              "queue": "http://d3js.org/queue.v1.min",
+              "d3.tip": mapBloggerPath + "d3.tip",
+              "50states" : mapBloggerPath + "50states"
             }
-            elem.src = d3TipJS;
-            var theBody = document.getElementsByTagName('body')[0];
-            theBody.appendChild(elem);
-        }
+        });
+
+        /* Actually load the main map module */
+        requirejs(["50states"]);
     }
+    elem.src = RequireJS;
+    var theBody = document.getElementsByTagName('body')[0];
+    theBody.appendChild(elem);
 })();

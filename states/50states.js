@@ -1,4 +1,4 @@
-function drawStatesMap() {
+require(["d3", "d3.tip", "queue", "topojson"], function(d3, tip, queue, topojson) {
 
   var statesFile = "https://dl.dropboxusercontent.com/s/t4h6uol5jgudo3e/us.json";
   var statesNamesFile = "https://dl.dropboxusercontent.com/s/h8pts8fkzgarajg/state_names.json";
@@ -32,7 +32,7 @@ function drawStatesMap() {
 
   var path = d3.geo.path();
 
-  var tip = d3.tip()
+  var local_tip = tip()
     .attr('class', 'd3-tip')
     .offset([-10, 0])
     .html(function(d, names, ran) {
@@ -47,7 +47,7 @@ function drawStatesMap() {
       .attr("viewBox", "0 0 960 500")
       .attr("width", "100%");
 
-  svg.call(tip);
+  svg.call(local_tip);
 
   function json(path, callback) {
     d3.json(path, function(json_) {
@@ -79,12 +79,11 @@ function drawStatesMap() {
           .attr("d", path)
           .on('mouseover', function(d) {
             if (hasRun(d.id, names, ran))
-              tip.show(d, names, ran);
+              local_tip.show(d, names, ran);
           })
           .on('mouseout', function(d) {
             if (hasRun(d.id, names, ran))
-              tip.hide(d, names, ran);
+              local_tip.hide(d, names, ran);
           });
     });
-
-}
+});
