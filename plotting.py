@@ -55,6 +55,7 @@ def PlotPaceVsDistance(workouts):
 
     recent_dist = []
     recent_pace = []
+    # Grab dist and pace data for all and lates runs
     for i, workout in enumerate(workouts):
         dist[i] = workout.GetTotalDist() / 1000.0 # in km
         pace[i] = workout.GetTotalTime() / dist[i]
@@ -64,10 +65,10 @@ def PlotPaceVsDistance(workouts):
             recent_pace.append(pace[i])
         
 
+    # Finally, do the scatters
     f = pp.figure()
     ax = pp.subplot(111)
     pp.scatter(dist, pace)
-
     pp.scatter(recent_dist, recent_pace, color='#08C43A')
 
     pp.ylabel("Run pace (min / km)")
@@ -78,10 +79,18 @@ def PlotPaceVsDistance(workouts):
 
     ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
+    # Fit for all runs
     slope, intercept, r_value, p_value, std_err = st.linregress(dist, pace)
     regr_x = np.array([5, 42])
     regr_y = intercept + regr_x * slope 
     pp.plot(regr_x, regr_y, '--', color='k')
+    pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
+
+    # Fit for recent runs
+    slope, intercept, r_value, p_value, std_err = st.linregress(recent_dist, recent_pace)
+    regr_x = np.array([5, 42])
+    regr_y = intercept + regr_x * slope 
+    pp.plot(regr_x, regr_y, '--', color='#08C43A')
     pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
 
     pp.show()
@@ -157,7 +166,7 @@ def PlotMonthlyDist(workouts):
     pp.plot(months[AV_MONTHS-1:], totals_av, 'o--', color='k', markersize=14, mfc='g')
 
     pp.legend(["Monthly", "3-month average"], loc='upper left')
-    pp.ylim([0, 240])
+    pp.ylim([0, 360])
     pp.xlim([months[0] - datetime.timedelta(days=31), months[-1] + datetime.timedelta(days=31)])
 
     ax.yaxis.grid(color='b')
