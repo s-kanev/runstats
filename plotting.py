@@ -1,4 +1,5 @@
 import matplotlib.pyplot as pp
+import matplotlib.dates
 import matplotlib as mpl
 import numpy as np
 from scipy import stats as st
@@ -43,12 +44,12 @@ def PlotPace(workouts):
     ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
     pp.grid(color='b')
-    pp.ylim([200, 450])
+    #pp.ylim([200, 450])
     pp.legend(loc='upper left', fancybox=True, fontsize=FONT_SIZE)
 
     pp.show()
 
-def PlotPaceVsDistance(workouts):
+def PlotPaceVsDistance(workouts, fname=None):
     nitems = len(workouts)
     dist = np.zeros(nitems)
     pace = np.zeros(nitems)
@@ -68,11 +69,17 @@ def PlotPaceVsDistance(workouts):
     # Finally, do the scatters
     f = pp.figure()
     ax = pp.subplot(111)
-    pp.scatter(dist, pace)
-    pp.scatter(recent_dist, recent_pace, color='#08C43A')
+    pp.plot(dist, pace, "o", markersize=6)
+    pp.plot(recent_dist, recent_pace, "o", mfc=COLORS[0], markersize=6)
 
-    pp.ylabel("Run pace (min / km)")
-    pp.xlabel("Run length (km)")
+    pp.ylabel("Run pace (min / km)", fontsize=FONT_SIZE)
+    pp.xlabel("Run length (km)", fontsize=FONT_SIZE)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+
 
     pp.xlim([0, 47.0])
     pp.ylim([220, 370])
@@ -84,18 +91,24 @@ def PlotPaceVsDistance(workouts):
     regr_x = np.array([5, 42])
     regr_y = intercept + regr_x * slope 
     pp.plot(regr_x, regr_y, '--', color='k')
-    pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
+    pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1] - 10), fontsize=FONT_SIZE-2)
 
     # Fit for recent runs
     slope, intercept, r_value, p_value, std_err = st.linregress(recent_dist, recent_pace)
     regr_x = np.array([5, 42])
     regr_y = intercept + regr_x * slope 
-    pp.plot(regr_x, regr_y, '--', color='#08C43A')
-    pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1]))
+    pp.plot(regr_x, regr_y, '--', color=COLORS[0])
+    pp.annotate("%.2f s/km^2" % slope, (regr_x[1] - 10.0, regr_y[1] - 10), color=COLORS[0], fontsize=FONT_SIZE-2)
 
+    ax.yaxis.grid(color='b')
+    pp.legend(["Total", "Last 60 days"], loc='lower right', fancybox=True, fontsize=FONT_SIZE)
+
+    pp.tight_layout()
+    if fname:
+        pp.savefig(fname)
     pp.show()
 
-def PlotDistanceAtPace(workouts):
+def PlotDistanceAtPace(workouts, fname=None):
     paces = []
     dists = []
 
@@ -124,14 +137,23 @@ def PlotDistanceAtPace(workouts):
 
     ax.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
-    pp.xlabel("Pace (min / km)")
-    pp.ylabel("Total distance at pace (km)")
+    pp.xlabel("Pace (min / km)", fontsize=FONT_SIZE)
+    pp.ylabel("Total distance at pace (km)", fontsize=FONT_SIZE)
 
-    pp.legend(["Total", "Last 60 days"])
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
 
+    pp.legend(["Total", "Last 60 days"], loc='upper right', fancybox=True, fontsize=FONT_SIZE)
+    pp.grid(color='b')
+
+    pp.tight_layout()
+    if fname:
+        pp.savefig(fname)
     pp.show()
 
-def PlotMonthlyDist(workouts):
+def PlotMonthlyDist(workouts, fname=None):
     monthly = {}
 
     for workout in workouts:
@@ -165,12 +187,25 @@ def PlotMonthlyDist(workouts):
 
     pp.plot(months[AV_MONTHS-1:], totals_av, 'o--', color='k', markersize=14, mfc='g')
 
-    pp.legend(["Monthly", "3-month average"], loc='upper left')
-    pp.ylim([0, 360])
-    pp.xlim([months[0] - datetime.timedelta(days=31), months[-1] + datetime.timedelta(days=31)])
+    pp.legend(["Monthly", "3-month average"], loc='upper left', fancybox=True, fontsize=FONT_SIZE)
+    pp.xlim([months[0] - datetime.timedelta(days=14), months[-1] + datetime.timedelta(days=14)])
 
     ax.yaxis.grid(color='b')
 
-    pp.ylabel("Total distance (km)")
+    pp.ylabel("Total distance (km)", fontsize=FONT_SIZE)
 
+    locator = mpl.dates.MonthLocator()
+    formatter = mpl.dates.AutoDateFormatter(locator)
+    formatter.scaled[30.0] = '%b' # only show month
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+
+    pp.tight_layout()
+    if fname:
+        pp.savefig(fname)
     pp.show()
