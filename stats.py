@@ -182,12 +182,20 @@ def ParseDoc(doc_name):
 
 ########################################################################
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Generate fancy running plots.")
     parser.add_argument("--fname")
-    parser.add_argument("--path")
+    parser.add_argument("--path", default="./data", help="Path to database of runs (default ./data)")
+    parser.add_argument("--start", default=None, help="Parse runs after date Y-m-d")
+    parser.add_argument("--export", default=False, action="store_true", help="Export plots")
     args = parser.parse_args()
     fname = args.fname
     path = args.path
+    if args.start:
+        ARGDATE_FORMAT = "%Y-%m-%d"
+        filter_start_time = datetime.strptime(args.start, ARGDATE_FORMAT)
+    else:
+        filter_start_time = None
+    export_figs = args.export
 
     if fname != None:
         fnames = fname.split(",")
@@ -209,8 +217,21 @@ if __name__ == "__main__":
             if workout == None:
                 print "Ignoring workout %s" % f
                 continue
+
+            if filter_start_time and workout.GetStartTime() < filter_start_time:
+                continue
+
             workouts.append(workout)
 
-        plotting.PlotPaceVsDistance(workouts)
-        plotting.PlotDistanceAtPace(workouts)
-        plotting.PlotMonthlyDist(workouts)
+        if export_figs:
+            pace_dist_name = "pace_distance.png"
+            pace_hist_name = "pace_hist.png"
+            monthly_name = "monthly.png"
+        else:
+            pace_dist_name = None
+            pace_hist_name = None
+            monthly_name = None
+
+        plotting.PlotPaceVsDistance(workouts, pace_dist_name)
+        plotting.PlotDistanceAtPace(workouts, pace_hist_name)
+        plotting.PlotMonthlyDist(workouts, monthly_name)
