@@ -8,8 +8,6 @@ import os
 
 import plotting
 
-TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
 ########################################################################
 class TrackPoint:
     def __init__(self):
@@ -123,6 +121,18 @@ class Workout:
             end += lap.dist / 1000.0
             res.append(end)
         return res
+
+########################################################################
+def ParseLapStartTime(start_time):
+    TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+    TIME_FORMAT_NO_MS = "%Y-%m-%dT%H:%M:%SZ"
+
+    try:
+        res = datetime.strptime(start_time, TIME_FORMAT)
+    except ValueError:
+        res = datetime.strptime(start_time, TIME_FORMAT_NO_MS)
+    return res
+
 ########################################################################
 def ParseLap(lap_element):
 
@@ -137,7 +147,7 @@ def ParseLap(lap_element):
     new_lap.SetTotals(dist_val, time_val)
 
     start_time = lap_element.get("StartTime")
-    new_lap.SetStart(datetime.strptime(start_time, TIME_FORMAT))
+    new_lap.SetStart(ParseLapStartTime(start_time))
 
     track = lap_element.find("./{*}Track")
     if track is None:

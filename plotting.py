@@ -45,7 +45,8 @@ def PlotPace(workouts):
 
     pp.grid(color='b')
     #pp.ylim([200, 450])
-    pp.legend(loc='upper left', fancybox=True, fontsize=FONT_SIZE)
+    pp.legend(loc='lower left', fancybox=True, fontsize=FONT_SIZE)
+    pp.tight_layout()
 
     pp.show()
 
