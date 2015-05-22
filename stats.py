@@ -237,11 +237,17 @@ if __name__ == "__main__":
             pace_dist_name = "pace_distance.png"
             pace_hist_name = "pace_hist.png"
             monthly_name = "monthly.png"
+            yearly_name = "yearly.png"
+            races_name = "races.png"
         else:
             pace_dist_name = None
             pace_hist_name = None
             monthly_name = None
+            yearly_name = None
+            races_name = None
 
         plotting.PlotPaceVsDistance(workouts, pace_dist_name)
         plotting.PlotDistanceAtPace(workouts, pace_hist_name)
         plotting.PlotMonthlyDist(workouts, monthly_name)
+        plotting.PlotYearlyCumulative(workouts, yearly_name)
+        plotting.PlotRaces(workouts, races_name)

@@ -13,6 +13,9 @@ FONT_SIZE = 18
 def MinuteFormatter(x, p):
     return "%02.d:%02.d" % (int(x / 60), x % 60)
 
+def HourMinFormatter(x, p):
+    return "%d:%02.d" % (int(x / 3600), int((x % 3600) / 60))
+
 def PlotAlt(workout):
     pp.figure()
 
@@ -83,7 +86,7 @@ def PlotPaceVsDistance(workouts, fname=None):
 
 
     pp.xlim([0, 47.0])
-    pp.ylim([220, 370])
+    pp.ylim([200, 370])
 
     ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(MinuteFormatter))
 
@@ -200,6 +203,131 @@ def PlotMonthlyDist(workouts, fname=None):
     formatter.scaled[30.0] = '%b' # only show month
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+
+    pp.tight_layout()
+    if fname:
+        pp.savefig(fname)
+    pp.show()
+
+def PlotRaces(workouts, fname):
+    pp.figure()
+    ax = pp.subplot(111)
+
+    race_times = []
+    dates = []
+    for workout in workouts:
+        if workout.GetTotalDist() < 41.0 * 1000:
+            continue
+
+        race_times.append(workout.GetTotalTime())
+        dates.append(workout.GetStartTime())
+
+
+    pp.plot(dates, race_times, "o", markersize=12,
+#                mfc=COLORS[i], label=workout.name,
+                color='k')
+
+    # calculate regression
+    days_diff = np.arange(len(dates))
+    for i,d in enumerate(dates):
+        days_diff[i] = (d - min(dates)).days
+    slope, intercept, r_value, p_value, std_err = st.linregress(days_diff, race_times)
+    regr_y = intercept + days_diff * slope
+
+    # plot regression
+    pp.plot(dates, regr_y, "--", color='#555555', lw=1.5, label=None)
+    month_slope = 30 * slope
+    pp.text(0.35, 0.30,
+            r"Trend: %d:%02.d / month" % (int(month_slope / 60),
+                                          int(abs(month_slope) % 60)),
+            horizontalalignment='center',
+            verticalalignment='center',
+            transform=ax.transAxes)
+
+    pp.ylabel("Marathon time", fontsize=FONT_SIZE)
+
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(FONT_SIZE)
+    pp.xticks(rotation=75)
+
+    xmin = min(dates) - datetime.timedelta(weeks=4)
+    xmax = max(dates) + datetime.timedelta(weeks=4)
+    pp.xlim([xmin, xmax])
+    ymin = 2 * 3600
+    ymax = 4 * 3600 + 20 * 60
+    pp.ylim([ymin, ymax])
+    lim = (ax.get_xlim()[1] - ax.get_xlim()[0]) /\
+          (ax.get_ylim()[1] - ax.get_ylim()[0])
+    ax.set_aspect(0.3 * lim)
+
+    ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(HourMinFormatter))
+
+    ax.set_axisbelow(True)
+    pp.grid(ls="-", color="#cccccc")
+    pp.tight_layout()
+    if fname:
+        pp.savefig(fname)
+    pp.show()
+
+def PlotYearlyCumulative(workouts, fname=None):
+    workouts_ = sorted(workouts, key=lambda x: x.GetStartTime())
+
+    years = []
+    for w in workouts_:
+        year = w.GetStartTime().year
+        if year not in years:
+            years.append(year)
+
+    pp.figure()
+    ax = pp.subplot(111)
+
+    for year in years:
+        year_start = datetime.date(year=year, month=1, day=1)
+        cum_dist = 0.0
+        days = []
+        for i in range(366):
+            days.append(year_start + datetime.timedelta(days=i))
+        daily_cum_dist = np.zeros(366) * float("NaN")
+        daily_cum_dist[0] = 0.0
+
+        for w in workouts_:
+            if w.GetStartTime().year != year:
+                continue
+
+            day_ind = (w.GetStartTime().date() - year_start).days
+
+            cum_dist += w.GetTotalDist() / 1000.0
+            daily_cum_dist[day_ind] = cum_dist
+
+        # fixup days that didn't contribute
+        for i,d in enumerate(days):
+            if np.isnan(daily_cum_dist[i]) and d < datetime.date.today():
+                daily_cum_dist[i] = daily_cum_dist[i-1]
+
+        pp.plot(daily_cum_dist, label=str(year), lw=2)
+
+    # sort both labels and handles by labels
+    handles, labels = ax.get_legend_handles_labels()
+    labels, handles = zip(*sorted(zip(labels, handles), reverse=True))
+    ax.legend(handles, labels,
+              loc='upper left', fancybox=True, fontsize=FONT_SIZE)
+
+    pp.xlim([0, 365])
+
+    lim = (ax.get_xlim()[1] - ax.get_xlim()[0]) /\
+          (ax.get_ylim()[1] - ax.get_ylim()[0])
+    ax.set_aspect(0.3 * lim)
+
+    ax.yaxis.grid(ls='-', color='#cccccc')
+
+    pp.ylabel("Cumulative distance (km)", fontsize=FONT_SIZE)
 
     for tick in ax.xaxis.get_major_ticks():
         tick.label.set_fontsize(FONT_SIZE)
